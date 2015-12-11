@@ -33,9 +33,6 @@ exports.pingUrls = function(arrUrls) {
     var currentTimeReadable = getTime(false);
     var currentTimeCompact = getTime(true);
 
-    // Notify STDOUT that a request round has been executed
-    console.log(currentTimeReadable + ' - request round executed.');
-
     // Iterate through the array of objects containing the URLs to ping and
     // send a request for each URL
     for (var i = 0; i < arrUrls.length; i++) {

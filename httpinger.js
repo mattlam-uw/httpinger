@@ -28,26 +28,18 @@ var urls;
 /**
  * Callback function to be passed with call to getUrls(). This function will
  * assign the url data retrieved by getUrls() to the urls variable and then
- * begin sending time-interval-spaced requests to the urls. We need to kick
- * off the requests from within the callback in order to ensure that the url
- * data has all been retrieved via asynchronous calls to retrieve the data.
+ * send a batch of requests to the urls. We need to kick off the requests from
+ * within the callback in order to ensure that the url data that has all been
+ * retrieved via asynchronous calls to retrieve the data.
  **/
 var cbGetUrlData = function(urlData) {
     // Assign the retrieved url data to the urls variable
     urls = urlData;
 
-    // Kick off time-interval-spaced requests every [PING_FREQ] seconds
-    var pingInterval = setInterval(pingUrlHelper, (PING_FREQ * 1000));
+    // Kick off a set of HTTP requests
+    httping.pingUrls(urls);
 };
 
 // Call getUrls() with the above callback in order to get the URLs and kick
 // off the requests
 urlsIO.getUrls(cbGetUrlData);
-
-// Because setInterval accepts only a reference to function, not function call
-// itself, a helper function is needed to wrap the actual function call
-function pingUrlHelper() {
-    httping.pingUrls(urls);
-}
-
-
