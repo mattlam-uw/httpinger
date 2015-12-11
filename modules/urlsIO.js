@@ -7,12 +7,16 @@
  * to provide model data continuity.
  */
 
+// Constants
+const ROOT_DIR = '/rc00/d51/mattlam/httpinger/';
+
 // Node.js Module Dependencies
 var fs = require('fs');     // Used for reading and writing to local system files
 
 // Retrieve all URL data from urls.json
 exports.getUrls = function(callback) {
-	 fs.readFile('./data/urls.json', 'utf8', function(err, data) {
+     var urlsDir = ROOT_DIR + 'data/urls.json';
+	 fs.readFile(urlsDir, 'utf8', function(err, data) {
 	    if (err) throw err;
 	    callback(JSON.parse(data));
 	});

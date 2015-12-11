@@ -14,12 +14,13 @@
 var http = require('http'); // Used to make HTTP requests
 var fs = require('fs');     // Used for reading and writing to local system files
 
-// Require local modules
-var logIO = require('./logIO.js');
-
 // Define constants. These may later be placed in a config file.
-const LOG_FILE_PATH = './logs/';     // Path to log files
+const ROOT_DIR = '/rc00/d51/mattlam/httpinger/';
+const LOG_FILE_PATH = 'logs/';     // Path to log files
 const REQ_LOG_FILE_NAME = 'header_request_log.txt'; // File name for standard log file
+
+// Require local modules
+var logIO = require(ROOT_DIR + 'modules/logIO.js');
 
 // Function to run through and ping all defined urls
 exports.pingUrls = function(arrUrls) {
@@ -64,9 +65,8 @@ function generateCallback(urlName, urlHost, urlPath, method,
     return function(res) {
         // Output the response body (web page code)
         var pageData = '';
-        var reqLogEntry = '';
-        var reqLogFilePath = '';
         var noSpaceName = removeNonAlpha(urlName);
+        var reqLogFilePath = ROOT_DIR + LOG_FILE_PATH;
 
         // The way streaming works in node.js, you must listen for and consume 
         // the response data in order for the response 'end' event to be fired. 
@@ -93,7 +93,7 @@ function generateCallback(urlName, urlHost, urlPath, method,
                 }
 
                 // Write the log entry to the general log file
-                logIO.writeReqLogEntry(LOG_FILE_PATH, REQ_LOG_FILE_NAME,
+                logIO.writeReqLogEntry(reqLogFilePath, REQ_LOG_FILE_NAME,
                     readableTime, urlName, urlHost, urlPath, res.statusCode);
             
             // If the request method is GET, this was a follow-up request for 
@@ -101,7 +101,7 @@ function generateCallback(urlName, urlHost, urlPath, method,
             // gets its own file. The name of the file will be:
             // "err-[timestamp]-[name for URL].html
             } else if (method == 'GET') {
-                logIO.writeErrLogEntry(LOG_FILE_PATH, compactTime, noSpaceName,
+                logIO.writeErrLogEntry(reqLogFilePath, compactTime, noSpaceName,
                     pageData, res.statusCode);
             }
         });
