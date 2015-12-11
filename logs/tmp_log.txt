@@ -1,0 +1,1 @@
+This is just a dummy file to get the /logs directory to be added to the httpinger repo.
