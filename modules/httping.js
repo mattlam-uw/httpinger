@@ -16,6 +16,7 @@ var fs = require('fs');     // Used for reading and writing to local system file
 
 // Define constants. These may later be placed in a config file.
 const ROOT_DIR = '/rc00/d51/mattlam/httpinger/';
+
 const LOG_FILE_PATH = 'logs/';     // Path to log files
 const REQ_LOG_FILE_NAME = 'header_request_log.txt'; // File name for standard log file
 
