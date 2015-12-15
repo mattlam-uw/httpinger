@@ -1,0 +1,5 @@
+This is a dummy file placed here for the purpose of adding the 'logs' directory to the httpinger repository.
+
+Once you have cloned the httpinger repository, you can safely delete this file.
+
+Leaving the file should also not cause any problems.
