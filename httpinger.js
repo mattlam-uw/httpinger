@@ -9,15 +9,13 @@
  *  + ./modules/urlsIO.js
  *
  */
-// Constants
-const ROOT_DIR = '/rc00/d51/mattlam/httpinger/';
 
 // Node.js Module Dependencies
 var fs = require('fs');     // Used for reading and writing to local system files
 
 // Require local modules
-var httping = require(ROOT_DIR + 'modules/httping.js');
-var urlsIO = require(ROOT_DIR + 'modules/urlsIO.js');
+var httping = require(__dirname + '/modules/httping.js');
+var urlsIO = require(__dirname + '/modules/urlsIO.js');
 
 // Define the urls variables outside of the functions that use the variable so
 // we can ensure it is asynchronously assigned data before we attempt to use

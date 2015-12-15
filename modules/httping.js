@@ -13,15 +13,16 @@
 // Node.js Module Dependencies
 var http = require('http'); // Used to make HTTP requests
 var fs = require('fs');     // Used for reading and writing to local system files
+var path = require('path'); // Used for creating urls to file resources
 
 // Define constants. These may later be placed in a config file.
-const ROOT_DIR = '/rc00/d51/mattlam/httpinger/';
+const ROOT_DIR = path.join(__dirname, '..');
 
-const LOG_FILE_PATH = 'logs/';     // Path to log files
-const REQ_LOG_FILE_NAME = 'header_request_log.txt'; // File name for standard log file
+const LOG_FILE_PATH = '/logs';     // Path to log files
+const REQ_LOG_FILE_NAME = '/header_request_log.txt'; // File name for standard log file
 
 // Require local modules
-var logIO = require(ROOT_DIR + 'modules/logIO.js');
+var logIO = require(ROOT_DIR + '/modules/logIO.js');
 
 // Function to run through and ping all defined urls
 exports.pingUrls = function(arrUrls) {

@@ -26,7 +26,7 @@ exports.writeReqLogEntry = function(filePath, fileName, readableTime, urlName,
 exports.writeErrLogEntry = function(filePath, compactTime, noSpaceName, pageData,
                                    statusCode) {
 
-    var fullLogFilePath = filePath + 'err-' + statusCode + '-' + compactTime
+    var fullLogFilePath = filePath + '/err-' + statusCode + '-' + compactTime
         + '-' + noSpaceName + '.html';
     fs.appendFile(fullLogFilePath, pageData, function(err) {
         if (err) return console.log(err);
