@@ -19,6 +19,6 @@ The logs are currently written to files in the ./logs directory.
 
 # Product Backlog
 | ID | Story |
---------------
+| -- | ----- |
 | 1 | First Story. |
 | 2 | Second Story. |
