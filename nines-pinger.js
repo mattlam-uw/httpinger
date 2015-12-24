@@ -26,8 +26,8 @@ var urls;
 
 // Open a MongoDB connection using Mongoose
 mongoose.connect('mongodb://localhost/nines', function(err) {
-    err ? console.log('connection error', err)
-        : console.log('connection successful');
+    err ? console.log('MongoDB connection error', err)
+        : console.log('MongoDB connection successful');
 });
 
 /**

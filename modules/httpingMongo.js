@@ -33,24 +33,35 @@ exports.pingUrls = function(arrUrls) {
         console.log('Error - no URL data provided');
         return;
     }
-    
-    // Retrieve readable and compact forms of timestamp for this round of requests
-    var currentTimeReadable = getTime(false);
-    var currentTimeCompact = getTime(true);
 
     // Iterate through the array of objects containing the URLs to ping and
     // send a request for each URL
     for (var i = 0; i < arrUrls.length; i++) {
         var reqMethod = 'HEAD'; // Method of http request to be sent
+        var reqDateTime = new Date(); // Timestamp for request
+
         // Generate request options
         var options = generateOptions(arrUrls[i].host, arrUrls[i].path, reqMethod);
+
         // Generate request callback
         var callback = generateCallback(arrUrls[i].name, arrUrls[i].host,
-            arrUrls[i].path, reqMethod, currentTimeReadable, currentTimeCompact,
-            i, arrUrls.length);
-        // Send the request
-        var req = http.request(options, callback);
-        req.end();
+            arrUrls[i].path, arrUrls[i].protocol, reqMethod, reqDateTime, i,
+            arrUrls.length);
+
+        // Send the request as http or https depending on protocol specified
+        if (arrUrls[i].protocol == 'http') {
+            var req = http.request(options, callback);
+            req.end();
+        } else if (arrUrls[i].protocol == 'https') {
+            // https capability coming in the future
+        } else {
+            // some protocol other than http and https was specified
+            console.log(
+                "The specified protocol for the URL " + arrUrls[i].host
+                + arrUrls[i].path + " is " + arrUrls[i].protocol
+                + ". It should be either 'http' or 'https'"
+            );
+        }
     }
 }
 
@@ -64,11 +75,11 @@ function generateOptions(host, path, method) {
 }
 
 // Function to generate a callback to be used for http.request
-function generateCallback(urlName, urlHost, urlPath, method,
-                          readableTime, compactTime, iteration,
-                          arrUrlsLength) {
+function generateCallback(urlName, urlHost, urlPath, urlProtocol, method,
+                          reqDateTime, iteration, arrUrlsLength) {
 
     return function(res) {
+
         // Output the response body (web page code)
         var pageData = '';
         var noSpaceName = removeNonAlpha(urlName);
@@ -93,67 +104,55 @@ function generateCallback(urlName, urlHost, urlPath, method,
                     // Set up for the follow-up request
                     var fullReqOptions = generateOptions(urlHost, urlPath, 'GET');
                     var fullReqCallback = generateCallback(urlName, urlHost,
-                            urlPath, 'GET', readableTime, compactTime);
+                            urlPath, urlProtocol, 'GET', reqDateTime, iteration,
+                            arrUrlsLength);
                     // Execute the follow-up request
                     http.request(fullReqOptions, fullReqCallback).end();
                 }
 
                 // Write the log entry to the general log file
-                logIO.writeReqLogEntry(reqLogFilePath, REQ_LOG_FILE_NAME,
-                    readableTime, urlName, urlHost, urlPath, res.statusCode);
+                //logIO.writeReqLogEntry(reqLogFilePath, REQ_LOG_FILE_NAME,
+                //    readableTime, urlName, urlHost, urlPath, res.statusCode);
+
+                // Add log of this request to the General Log
+                var eventType = urlProtocol + ' request';
+                var eventDescription = 'name: ' + urlName + '\n'
+                                     + 'host: ' + urlHost + '\n'
+                                     + 'path: ' + urlPath + '\n'
+                                     + 'response code: ' + res.statusCode;
+
+                logIOMongo.writeGeneralLogEntry(reqDateTime, eventType, eventDescription);
+
+                // Check to see if this is the last of the request batch. If it
+                // is, then close the MongoDB connection following a 10 second
+                // wait. I was unable to come up with a more elegant solution
+                // for closing the MongoDB connection without stepping on any
+                // possible pending log writes. I think this is pretty safe.
+                if (iteration == arrUrlsLength - 1) {
+                    setTimeout(
+                        function() {
+                            mongoose.connection.close();
+                            console.log('MongoDB connection closed');
+                        },
+                        10000
+                    );
+                }
             
             // If the request method is GET, this was a follow-up request for 
             // a full page. Log this in a separate file. Each follow-up request
             // gets its own file. The name of the file will be:
             // "err-[timestamp]-[name for URL].html
             } else if (method == 'GET') {
+                // Get the current date for logging
                 var reqTime = new Date();
-                logIOMongo.writeErrLogEntry(res.statusCode, urlName, urlPath, reqTime, pageData);
+                // Combine protocol host and path into a URL for logging
+                var fullUrl = urlProtocol + "://" +  urlHost + urlPath;
 
-                // If this is the last URL to be pinged, then close the MongoDB connection
-                // +++++ DEBUG CODE START +++++++++++++++++++++++++++++++++++++
-                console.log('iteration: ', iteration);
-                console.log('arrUrlsLength: ', arrUrlsLength);
-                // +++++ DEBUG CODE END +++++++++++++++++++++++++++++++++++++++
-                if (iteration == arrUrlsLength - 1) {
-                    mongoose.connection.close();
-                }
-
-                // +++++ DEBUG CODE START +++++++++++++++++++++++++++++++++++++
-                console.log('Status Code: ', res.statusCode);
-                console.log('URL Name: ', urlName);
-                console.log('URL Path: ', urlPath);
-                console.log('DateTime: ', reqTime);
-                // +++++ DEBUG CODE END +++++++++++++++++++++++++++++++++++++++
-                logIO.writeErrLogEntry(reqLogFilePath, compactTime, noSpaceName,
-                    pageData, res.statusCode);
-
+                // Log the error response to MongoDB
+                logIOMongo.writeErrLogEntry(res.statusCode, urlName, fullUrl, reqTime, pageData);
             }
         });
     };
-}
-
-// Function to return the current date and time as a string. Passing true for
-// the 'compact' parameter provides a compact no-space version suitable for file
-// names. Passing false provides an easier to read version.
-function getTime(compact) {
-    var currentDate = new Date();
-    var currentMonth = currentDate.getMonth() + 1;
-    if (!compact) {
-        return '' + currentDate.getFullYear()
-            + currentMonth
-            + currentDate.getDate() + " - "
-            + currentDate.getHours() + ":"
-            + currentDate.getMinutes() + ":"
-            + currentDate.getSeconds();
-    } else {
-        return '' + currentDate.getFullYear()
-            + currentMonth
-            + currentDate.getDate() + '-'
-            + currentDate.getHours()
-            + currentDate.getMinutes()
-            + currentDate.getSeconds();
-    }
 }
 
 // Function for replacing non-alphanumeric characters, including any white

@@ -10,6 +10,7 @@ var router = express.Router();
 // -- ErrorsMongo mongoose model
 var mongoose = require('mongoose');
 var Errors = require('../../models/ErrorsMongo');
+var General = require('../../models/GeneralLog');
 
 
 /* GET (retrieve all) errors */
@@ -31,12 +32,9 @@ router.post('/', function(req, res, next) {
 });
 
 // Create new MongoDB doc in Errors collection for a request error occurrence
-
 exports.writeErrLogEntry = function(statusCode, resourceName, resourceUrl, requestDateTime, responseData) {
+
     // Create a new error log entry from data passed to this function
-    // +++++ DEBUG CODE START +++++++++++++++++++++++++++++++++++++
-    console.log('Creating the new error log entry Mongoose Schema object');
-    // +++++ DEBUG CODE END +++++++++++++++++++++++++++++++++++++++
     var newErrLogEntry = Errors({
         status_code: statusCode,
         resource_name: resourceName,
@@ -44,13 +42,25 @@ exports.writeErrLogEntry = function(statusCode, resourceName, resourceUrl, reque
         response: responseData,
         request_datetime: requestDateTime
     });
+
     // Save the new error log entry to MongoDB
-    // +++++ DEBUG CODE START +++++++++++++++++++++++++++++++++++++
-    console.log('Saving the new error log entry to MongoDB');
-    // +++++ DEBUG CODE END +++++++++++++++++++++++++++++++++++++++
     newErrLogEntry.save(function(err) {
-        console.log('Saving . . . ');
-        if (err) console.err(err);
-        console.log('Error Log Entry Added!');
+        if (err) console.log(err);
+        console.log('Error Log Entry Added');
     });
-}
+};
+
+exports.writeGeneralLogEntry = function(eventDateTime, eventType, eventDescription) {
+    // Create a new general log entry from data passed to this function
+    var newGeneralLogEntry = General({
+        event_datetime: eventDateTime,
+        event_type: eventType,
+        event_description: eventDescription
+    });
+
+    // Save the new general log entry to MongoDB
+    newGeneralLogEntry.save(function(err) {
+        if (err) console.log(err);
+        console.log('General Log Entry Added');
+    });
+};
