@@ -14,7 +14,7 @@
 var http = require('http'); // Used to make HTTP requests
 var fs = require('fs');     // Used for reading and writing to local system files
 var path = require('path'); // Used for creating urls to file resources
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'); // Used for interaction with MongoDB-based model
 
 // Define constants. These may later be placed in a config file.
 const ROOT_DIR = path.join(__dirname, '..');
@@ -58,8 +58,8 @@ exports.pingUrls = function(arrUrls) {
             // some protocol other than http and https was specified
             console.log(
                 "The specified protocol for the URL " + arrUrls[i].host
-                + arrUrls[i].path + " is " + arrUrls[i].protocol
-                + ". It should be either 'http' or 'https'"
+                + arrUrls[i].path + " is '" + arrUrls[i].protocol + "'"
+                + ". It should be either 'http' or 'https'."
             );
         }
     }
