@@ -9,8 +9,8 @@ var express = require('express');
 var router = express.Router();
 // -- ErrorsMongo mongoose model
 var mongoose = require('mongoose');
-var Errors = require('../../models/ErrorsMongo');
-var General = require('../../models/GeneralLog');
+var Errors = require('../../models/Errors');
+var Events = require('../../models/Events');
 
 
 /* GET (retrieve all) errors */
@@ -52,7 +52,7 @@ exports.writeErrLogEntry = function(statusCode, resourceName, resourceUrl, reque
 
 exports.writeGeneralLogEntry = function(eventDateTime, eventType, eventDescription) {
     // Create a new general log entry from data passed to this function
-    var newGeneralLogEntry = General({
+    var newGeneralLogEntry = Events({
         event_datetime: eventDateTime,
         event_type: eventType,
         event_description: eventDescription
